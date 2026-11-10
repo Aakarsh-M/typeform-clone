@@ -1,6 +1,12 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { Suspense } from "react";
 
-// Phase 2: public link with copy button, publish / unpublish.
+import { SharePanel } from "@/components/share/SharePanel";
+import { PageSpinner } from "@/components/ui/Spinner";
+
 export default function SharePage() {
-  return <ComingSoon title="Share">Public link and publishing land in phase 2.</ComingSoon>;
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <SharePanel />
+    </Suspense>
+  );
 }

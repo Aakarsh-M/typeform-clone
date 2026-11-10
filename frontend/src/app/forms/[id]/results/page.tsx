@@ -1,6 +1,12 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { Suspense } from "react";
 
-// Phase 5: Summary and Responses tabs, CSV export.
+import { Results } from "@/components/results/Results";
+import { PageSpinner } from "@/components/ui/Spinner";
+
 export default function ResultsPage() {
-  return <ComingSoon title="Results">Summary and responses land in phase 5.</ComingSoon>;
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <Results />
+    </Suspense>
+  );
 }

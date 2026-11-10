@@ -1,6 +1,12 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { Suspense } from "react";
 
-// Phase 4: three-panel builder (question list · live preview · settings).
+import { Builder } from "@/components/builder/Builder";
+import { PageSpinner } from "@/components/ui/Spinner";
+
 export default function CreatePage() {
-  return <ComingSoon title="Builder">The form builder lands in phase 4.</ComingSoon>;
+  return (
+    <Suspense fallback={<PageSpinner />}>
+      <Builder />
+    </Suspense>
+  );
 }

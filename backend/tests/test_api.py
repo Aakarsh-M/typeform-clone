@@ -63,6 +63,7 @@ def test_form_crud_and_listing(client):
     fid, qs = make_form(client)
     forms = client.get("/api/forms").json()
     assert forms[0]["title"] == "Survey"
+    assert forms[0]["created_at"].endswith("+00:00")  # timestamps carry their UTC offset
     assert forms[0]["status"] == "draft"
     assert forms[0]["question_count"] == 9
 

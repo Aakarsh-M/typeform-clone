@@ -1,11 +1,22 @@
 """Request and response bodies for the API (Pydantic v2)."""
 
-from datetime import datetime
-from typing import Any
+from datetime import datetime, timezone
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
 
 from app.models import FormStatus, QuestionType, ResponseStatus
+
+
+def _as_utc(value: datetime) -> str:
+    # SQLite stores datetimes without a timezone; they are always UTC here.
+    # Sending the offset stops browsers from reading them as local time.
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.isoformat()
+
+
+UTCDateTime = Annotated[datetime, PlainSerializer(_as_utc, return_type=str)]
 
 
 class ORMModel(BaseModel):
@@ -79,9 +90,9 @@ class FormListItem(ORMModel):
     status: FormStatus
     question_count: int
     response_count: int
-    created_at: datetime
-    updated_at: datetime
-    published_at: datetime | None
+    created_at: UTCDateTime
+    updated_at: UTCDateTime
+    published_at: UTCDateTime | None
 
 
 class FormDetail(FormListItem):
@@ -116,7 +127,7 @@ class SubmitIn(BaseModel):
 
 class SubmitOut(BaseModel):
     response_id: str
-    submitted_at: datetime
+    submitted_at: UTCDateTime
 
 
 # ---------- Results ----------
@@ -131,8 +142,8 @@ class AnswerOut(BaseModel):
 class ResponseOut(BaseModel):
     id: str
     status: ResponseStatus
-    started_at: datetime
-    submitted_at: datetime | None
+    started_at: UTCDateTime
+    submitted_at: UTCDateTime | None
     answers: list[AnswerOut]
 
 

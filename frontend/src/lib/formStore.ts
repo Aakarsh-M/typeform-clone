@@ -45,6 +45,8 @@ const pending = new Map<number, QuestionPatch>();
 const timers = new Map<number, ReturnType<typeof setTimeout>>();
 const inFlight = new Map<number, Promise<void>>();
 let tempChoiceId = -1; // new choices get negative ids until the server assigns real ones
+let settingsPatch: FormSettings | null = null;
+let settingsTimer: ReturnType<typeof setTimeout> | undefined;
 
 export const useFormStore = create<FormState>((set, get) => {
   const patchQuestion = (id: number, fn: (q: Question) => Question) =>
@@ -99,9 +101,22 @@ export const useFormStore = create<FormState>((set, get) => {
   };
 
   const queue = (id: number, patch: QuestionPatch) => {
-    pending.set(id, { ...pending.get(id), ...patch });
+    const prev = pending.get(id);
+    const merged: QuestionPatch = { ...prev, ...patch };
+    // properties is itself a partial patch: merge it, don't let a later key replace an earlier one.
+    if (prev?.properties && patch.properties) merged.properties = { ...prev.properties, ...patch.properties };
+    pending.set(id, merged);
     clearTimeout(timers.get(id));
     timers.set(id, setTimeout(() => void flush(id), SAVE_DELAY_MS));
+  };
+
+  const flushSettings = async () => {
+    clearTimeout(settingsTimer);
+    const form = get().form;
+    if (!form || !settingsPatch) return;
+    const patch = settingsPatch;
+    settingsPatch = null;
+    await track(api.updateForm(form.id, { settings: patch })).catch(fail("Couldn't save settings"));
   };
 
   const setChoices = (id: number, fn: (choices: Choice[]) => Choice[]) => {
@@ -141,7 +156,10 @@ export const useFormStore = create<FormState>((set, get) => {
       const form = get().form;
       if (!form) return;
       set({ form: { ...form, settings: { ...form.settings, ...patch } } });
-      await track(api.updateForm(form.id, { settings: patch })).catch(fail("Couldn't save settings"));
+      // Debounced like question edits: the thank-you text is typed on the canvas.
+      settingsPatch = { ...settingsPatch, ...patch };
+      clearTimeout(settingsTimer);
+      settingsTimer = setTimeout(() => void flushSettings(), SAVE_DELAY_MS);
     },
 
     async setPublished(published) {
@@ -161,6 +179,9 @@ export const useFormStore = create<FormState>((set, get) => {
     async addQuestion(type, position) {
       const form = get().form;
       if (!form) return;
+      // Save pending edits first: the form is re-fetched below, which would
+      // otherwise overwrite local changes that haven't reached the server.
+      await get().flushAll();
       try {
         await track(api.addQuestion(form.id, { type, position }));
         const fresh = await api.getForm(form.id); // positions of later questions shifted
@@ -175,7 +196,7 @@ export const useFormStore = create<FormState>((set, get) => {
       const form = get().form;
       const q = form?.questions.find((x) => x.id === id);
       if (!form || !q) return;
-      await flush(id);
+      await get().flushAll();
       try {
         const copy = await track(
           api.addQuestion(form.id, {
@@ -257,6 +278,7 @@ export const useFormStore = create<FormState>((set, get) => {
     },
 
     async flushAll() {
+      await flushSettings();
       await Promise.all([...new Set([...pending.keys(), ...inFlight.keys()])].map((id) => flush(id)));
     },
   };

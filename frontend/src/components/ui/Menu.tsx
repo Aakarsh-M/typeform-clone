@@ -2,7 +2,7 @@
 
 // Small popover menu (the "..." menus on forms and questions).
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 export interface MenuItem {
@@ -39,13 +39,12 @@ export function Menu({ trigger, items, align = "right" }: MenuProps) {
   return (
     <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
       {trigger({ open, toggle: () => setOpen((o) => !o) })}
-      <AnimatePresence>
-        {open && (
+      {/* No exit animation: a menu must disappear the instant an item is chosen. */}
+      {open && (
           <motion.ul
             role="menu"
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.12 }}
             className={`absolute z-40 mt-1 min-w-44 rounded-lg border border-line bg-surface py-1 shadow-lg ${
               align === "right" ? "right-0" : "left-0"
@@ -69,8 +68,7 @@ export function Menu({ trigger, items, align = "right" }: MenuProps) {
               </li>
             ))}
           </motion.ul>
-        )}
-      </AnimatePresence>
+      )}
     </div>
   );
 }
