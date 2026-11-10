@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+/* Design tokens, approximating Typeform's admin UI and default form theme. */
+:root {
+  --tf-ink: #262627; /* primary text, black buttons */
+  --tf-ink-muted: #5e5e5e;
+  --tf-border: #e3e3e3;
+  --tf-surface: #ffffff;
+  --tf-canvas: #f7f7f6; /* workspace & builder background */
+  --tf-hover: #f0f0ef;
+  --tf-accent: #0445af; /* default respondent theme: buttons, answers */
+  --tf-accent-soft: rgba(4, 69, 175, 0.1);
+  --tf-danger: #c32b1f;
+  --tf-success: #1f8a5b;
+}
+
+@theme inline {
+  --color-ink: var(--tf-ink);
+  --color-ink-muted: var(--tf-ink-muted);
+  --color-line: var(--tf-border);
+  --color-surface: var(--tf-surface);
+  --color-canvas: var(--tf-canvas);
+  --color-hover: var(--tf-hover);
+  --color-accent: var(--tf-accent);
+  --color-accent-soft: var(--tf-accent-soft);
+  --color-danger: var(--tf-danger);
+  --color-success: var(--tf-success);
+  --font-sans: "Inter Variable", system-ui, sans-serif;
+}
+
+body {
+  background: var(--tf-canvas);
+  color: var(--tf-ink);
+  font-family: var(--font-sans);
+}
