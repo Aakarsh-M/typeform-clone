@@ -45,7 +45,7 @@ FORMS = [
             dict(type=T.multiple_choice, title="How did you hear about us?",
                  choices=["Search engine", "Social media", "Friend or colleague", "Blog or article", "Other"]),
             dict(type=T.multiple_choice, title="Which features do you use most?",
-                 description="Choose as many as you like", properties={"allow_multiple": True},
+                 properties={"allow_multiple": True},
                  choices=["Form builder", "Templates", "Integrations", "Analytics", "Logic jumps"]),
             dict(type=T.yes_no, title="Would you recommend us to a friend?", required=True),
             dict(type=T.long_text, title="Anything else you'd like to tell us?",

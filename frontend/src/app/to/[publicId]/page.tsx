@@ -1,6 +1,12 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { Suspense } from "react";
 
-// Phase 3: the one-question-at-a-time respondent flow.
+import { PublicFormPage } from "@/components/respondent/PublicFormPage";
+
+// Public, no-login respondent experience: /to/<public_id>
 export default function RespondentPage() {
-  return <ComingSoon title="Respondent flow">The fill experience lands in phase 3.</ComingSoon>;
+  return (
+    <Suspense>
+      <PublicFormPage />
+    </Suspense>
+  );
 }
